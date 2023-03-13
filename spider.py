@@ -5,11 +5,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import datetime
+from tqdm import tqdm
 
 def get_keywords(count):
     movies=pd.read_csv('data/input.csv',encoding='utf-8')
-    if(count==None):
-        count=500
     return movies.Title.values[:count]
 
 def get_driver_options():
@@ -66,8 +65,7 @@ def search(driver,keyword):
 
     # 获取搜索结果中第一个电影的链接
     first_result = driver.find_elements(By.CLASS_NAME, "ipc-metadata-list-summary-item")
-    print(first_result)
-    print(len(first_result))
+    print("找到结果:",len(first_result),"个",flush=True)
     if(len(first_result)>0):
         links=first_result[0].find_elements(By.TAG_NAME,'a')
         if(len(links)>0):
@@ -77,33 +75,38 @@ def search(driver,keyword):
             return {"Title":keyword,"url":movie_url,'time':datetime.datetime.now()}
 
 def main(count=None):
+    if(count==None):
+        count=500
     driver = get_driver()
     # 打开IMDB网站
     driver.get("https://www.imdb.com/")
     csv_file='data/output.csv'
     datas=[]
-    for keyword in get_keywords(count):
-        print("==="*20,flush=True)
-        print("keyword:",keyword,flush=True)
-        try:
-            result=search(driver=driver,keyword=keyword)
-            if(result is not None):
-                datas.append(result)
-            df = pd.DataFrame(result, columns=['Title','url','time'])
+    
+    with tqdm(total=count) as pbar:
+        for keyword in get_keywords(count):
+            print("==="*20,flush=True)
+            print("keyword:",keyword,flush=True)
             try:
-                csv_df=pd.read_csv(csv_file,index=False)
-                csv_df.merge(df)
-                csv_df.drop_duplicates(subset=['link'],keep='last',inplace=True)
-                csv_df.to_csv(csv_file)
-                print("csv 合并成功",flush=True)
-            except:
-                df.to_csv(csv_file,index=False)
-                print("csv 新建成功",flush=True)
-        except Exception as e:
-            # 关闭浏览器
-            driver.quit()
-            driver = get_driver()
-            # 打开IMDB网站
-            driver.get("https://www.imdb.com/")
-            print("error:",e,flush=True)
+                result=search(driver=driver,keyword=keyword)
+                if(result is not None):
+                    datas.append(result)
+                df = pd.DataFrame(result, columns=['Title','url','time'])
+                try:
+                    csv_df=pd.read_csv(csv_file,index=False)
+                    csv_df.merge(df)
+                    csv_df.drop_duplicates(subset=['link'],keep='last',inplace=True)
+                    csv_df.to_csv(csv_file)
+                    print("csv 合并成功",flush=True)
+                except:
+                    df.to_csv(csv_file,index=False)
+                    print("csv 新建成功",flush=True)
+            except Exception as e:
+                # 关闭浏览器
+                driver.quit()
+                driver = get_driver()
+                # 打开IMDB网站
+                driver.get("https://www.imdb.com/")
+                print("error:",e,flush=True)
+            pbar.update(1)
     return csv_file

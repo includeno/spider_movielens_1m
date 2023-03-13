@@ -1,3 +1,7 @@
-from imdb_url_list import get_keywords,search
+from tqdm import tqdm
+import time
 
-print(get_keywords(10))
+with tqdm(total=100) as pbar:
+    for i in range(100):
+        time.sleep(0.1)
+        pbar.update(1)
