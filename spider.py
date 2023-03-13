@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import datetime
 from tqdm import tqdm
+import time
 
 def get_keywords(index,limit=None):
     movies=pd.read_csv(f'data/input_{index}.csv',encoding='utf-8')
@@ -59,6 +60,9 @@ def get_driver():
         options.add_argument('--disable-extensions')
         options.add_argument('--disable-gpu')
         driver = webdriver.Firefox(options=options)
+    # 设置最大等待时间为10秒
+    driver.implicitly_wait(10)
+    driver.set_page_load_timeout(15)
     return driver
 
 def search(driver,keyword):
@@ -67,6 +71,7 @@ def search(driver,keyword):
     search_box = driver.find_element(By.CLASS_NAME,"imdb-header-search__input")
     search_box.send_keys(keyword)
     search_box.send_keys(Keys.RETURN)
+    time.sleep(1)
 
     # 等待搜索结果页面加载完成
     wait = WebDriverWait(driver, 10)
@@ -111,7 +116,7 @@ def main(index=None,limit=None):
                     # 将数据帧2连接到数据帧1中
                     new_df = pd.concat([csv_df, df], ignore_index=True)
                     print("csv 合并中2...",flush=True)
-                    new_df.drop_duplicates(subset=['url'],keep='last',inplace=True)
+                    #new_df.drop_duplicates(subset=['url'],keep='last',inplace=True)
                     print("csv 合并中3...",flush=True)
                     new_df.to_csv(csv_file,index=False)
                     print("csv 合并成功",flush=True)
