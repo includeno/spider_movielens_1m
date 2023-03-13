@@ -1,0 +1,76 @@
+# https://docs.github.com/en/actions/guides
+# CI name , it will display on github's action page menu
+name: Run Spider
+# trigger on which this CI should be run
+on: # push operation is operate
+  push:
+    # here since my repository branch is named `main` , you should follow your own repository like `master`
+    branches: [main]
+  schedule:
+    - cron: "0 0/6 * * *"
+# CI enviroment settings
+env:
+  TAG: "movielens-1m"
+  VERSION: "0.1"
+jobs:
+  build:
+    name: 构建,发布
+    #Release 所需权限
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest # use latest ubuntu to run the job
+    # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+      # here are some step followed , each step must have `uses` or `run` key , for CI to run
+      # other key like `name`,`with`,`env` is optional
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Output Docker info
+        run: docker info
+      - name: Set environment variable with current time small
+        run: echo "NOW=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+      - name: get sercets
+        run: |
+          echo ${{secrets.SENDER}}
+          echo ${{secrets.PASSWORD}}
+          echo ${{secrets.RECIPIENT}}
+          echo ${{secrets.SMTP_SERVER}}
+          echo ${{secrets.PORT}}
+      - name: Run Spider
+        run: |
+          docker build -t test_image  .
+          docker run --name test_container -e SENDER=${{secrets.SENDER}} -e PASSWORD=${{secrets.PASSWORD}} -e RECIPIENT=${{secrets.RECIPIENT}} -e SMTP_SERVER=${{secrets.SMTP_SERVER}} -e PORT=${{secrets.PORT}} test_image
+          docker cp test_container:/app .
+      - name: ZIP project # This would actually build your project, using zip for an example artifact
+        run: |
+          zip -q -r ${{env.TAG}}-${{env.NOW}}-production.zip *
+      
+      # https://github.com/marketplace/actions/create-release
+      - uses: ncipollo/release-action@v1
+        id: create_release
+        with:
+          tag: hexun_${{ env.NOW }}
+        continue-on-error: false
+      
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1 #https://github.com/actions/upload-release-asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ${{env.TAG}}-${{env.NOW}}-production.zip
+          asset_name: ${{env.TAG}}-${{env.NOW}}-production.zip
+          asset_content_type: application/zip
+        continue-on-error: false
+      
+      - name: The job has succeeded
+        if: ${{ success() }}
+        run: echo "success"
