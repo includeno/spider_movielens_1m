@@ -76,11 +76,12 @@ def search(driver,keyword):
 
 def main(count=None):
     if(count==None):
-        count=500
+        count=10
     driver = get_driver()
     # 打开IMDB网站
     driver.get("https://www.imdb.com/")
     csv_file='data/output.csv'
+
     datas=[]
     
     with tqdm(total=count) as pbar:
@@ -93,9 +94,10 @@ def main(count=None):
                     datas.append(result)
                 df = pd.DataFrame(result, columns=['Title','url','time'])
                 try:
+                    print("csv 合并中...",flush=True)
                     csv_df=pd.read_csv(csv_file,index=False)
                     csv_df.merge(df)
-                    csv_df.drop_duplicates(subset=['link'],keep='last',inplace=True)
+                    csv_df.drop_duplicates(subset=['url'],keep='last',inplace=True)
                     csv_df.to_csv(csv_file)
                     print("csv 合并成功",flush=True)
                 except:
