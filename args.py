@@ -13,7 +13,7 @@ def today():
 parser = argparse.ArgumentParser(description='一个简单的命令行接口示例')
 
 # 添加命令行参数
-parser.add_argument('--count',required=False, default=None, help='输入爬取的数量')
+parser.add_argument('--index',required=False, default=None, help='输入文件编号')
 #email
 parser.add_argument('--sender',required=True, help='输入发送邮箱')
 parser.add_argument('--ps',required=True, help='输入邮箱密码')
@@ -28,6 +28,6 @@ args = parser.parse_args()
 with open('DATE', 'w') as f:
     f.write(f'DATE={today()}\n')
 
-file_path=main(args.count)
+file_path=main(args.index)
 
 send_email(args.sender,args.ps,args.recipient,args.smtp_server,args.port,subject='Movielens-1m',attachment_path=file_path)

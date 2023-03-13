@@ -13,6 +13,7 @@ ARG PASSWORD='a@126.com'
 ARG RECIPIENT='a@126.com'
 ARG SMTP_SERVER='smtp.126.com'
 ARG PORT=25
+ARG INDEX=1
 RUN echo ${SENDER} ${PASSWORD} ${RECIPIENT} ${SMTP_SERVER} ${PORT}
 
-CMD python args.py --sender ${SENDER} --ps ${PASSWORD} --recipient ${RECIPIENT} --smtp_server ${SMTP_SERVER} --port ${PORT}
+CMD python args.py --sender ${SENDER} --ps ${PASSWORD} --recipient ${RECIPIENT} --smtp_server ${SMTP_SERVER} --port ${PORT} --index=${INDEX}

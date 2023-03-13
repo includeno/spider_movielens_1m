@@ -7,11 +7,11 @@ from selenium.webdriver.support import expected_conditions as EC
 import datetime
 from tqdm import tqdm
 
-def get_keywords(count):
-    movies=pd.read_csv('data/input.csv',encoding='utf-8')
-    return movies.Title.values[:count]
+def get_keywords(index):
+    movies=pd.read_csv(f'data/input_{index}.csv',encoding='utf-8')
+    return movies.Title.values
 
-def get_driver_options():
+def get_driver_by_system():
     import platform
 
     if platform.system() == 'Windows':
@@ -23,7 +23,7 @@ def get_driver_options():
         #options.add_argument('--headless')
         options.add_argument('--disable-extensions')
         #options.add_argument('--disable-gpu')
-        return options
+        return webdriver.Firefox(options=options)
     elif platform.system() == 'Linux':
         print('当前系统为 Linux')
         # 设置浏览器选项
@@ -33,23 +33,30 @@ def get_driver_options():
         options.add_argument('--headless')
         options.add_argument('--disable-extensions')
         options.add_argument('--disable-gpu')
-        return options
+        return webdriver.Firefox(options=options)
     elif platform.system() == 'Darwin':
         print('当前系统为 macOS')
         # 设置浏览器选项
-        options = webdriver.FirefoxOptions()
+        options = webdriver.ChromeOptions()
         options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
+        #options.add_argument('--disable-dev-shm-usage')
         #options.add_argument('--headless')
         options.add_argument('--disable-extensions')
         options.add_argument('--disable-gpu')
-        return options
+        return webdriver.Chrome(options=options)
     else:
         print('无法确定当前系统类型')
         return None
 
 def get_driver():
-    driver = webdriver.Firefox(options=get_driver_options())
+    driver = get_driver_by_system()
+    if(driver is None):
+        options = webdriver.FirefoxOptions()
+        options.add_argument('--no-sandbox')
+        options.add_argument('--headless')
+        options.add_argument('--disable-extensions')
+        options.add_argument('--disable-gpu')
+        driver = webdriver.Firefox(options=options)
     return driver
 
 def search(driver,keyword):
@@ -75,33 +82,39 @@ def search(driver,keyword):
             return {"Title":keyword,"url":movie_url,'time':datetime.datetime.now()}
     return {"Title":keyword,"url":"",'time':datetime.datetime.now()}
 
-def main(count=None):
-    if(count==None):
-        count=10
+def main(index=None):
+    if(index==None):
+        index=1
     driver = get_driver()
     # 打开IMDB网站
     driver.get("https://www.imdb.com/")
-    csv_file='data/output.csv'
+    csv_file=f'data/output_{index}.csv'
 
     datas=[]
-    
+    keywords=get_keywords(index)
+    count=len(keywords)
     with tqdm(total=count) as pbar:
-        for keyword in get_keywords(count):
+        for keyword in keywords:
             print("==="*20,flush=True)
             print("keyword:",keyword,flush=True)
             try:
                 result=search(driver=driver,keyword=keyword)
                 if(result is not None):
                     datas.append(result)
-                df = pd.DataFrame(result, columns=['Title','url','time'])
+                df = pd.DataFrame(datas, columns=['Title','url','time'])
                 try:
                     print("csv 合并中...",flush=True)
-                    csv_df=pd.read_csv(csv_file,index=False)
-                    csv_df.merge(df)
-                    csv_df.drop_duplicates(subset=['url'],keep='last',inplace=True)
-                    csv_df.to_csv(csv_file)
+                    csv_df=pd.read_csv(csv_file,encoding='utf-8')
+                    print("csv 合并中1...",flush=True)
+                    # 将数据帧2连接到数据帧1中
+                    new_df = pd.concat([csv_df, df], ignore_index=True)
+                    print("csv 合并中2...",flush=True)
+                    new_df.drop_duplicates(subset=['url'],keep='last',inplace=True)
+                    print("csv 合并中3...",flush=True)
+                    new_df.to_csv(csv_file)
                     print("csv 合并成功",flush=True)
-                except:
+                except Exception as e:
+                    print("csv error:",e,flush=True)
                     df.to_csv(csv_file,index=False)
                     print("csv 新建成功",flush=True)
             except Exception as e:
