@@ -55,13 +55,13 @@ jobs:
           docker cp test_container:/app .
       - name: ZIP project # This would actually build your project, using zip for an example artifact
         run: |
-          zip -q -r ${{env.TAG}}-${{env.NOW}}-production.zip *
+          zip -q -r ${{env.TAG}}-${{matrix.INDEX}}-production.zip *
       
       # https://github.com/marketplace/actions/create-release
       - uses: ncipollo/release-action@v1
         id: create_release
         with:
-          tag: hexun_${{ env.NOW }}
+          tag: ${{env.TAG}}-${{matrix.INDEX}}-${{ env.NOW }}
         continue-on-error: false
       
       - name: Upload Release Asset
@@ -71,8 +71,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ${{env.TAG}}-${{env.NOW}}-production.zip
-          asset_name: ${{env.TAG}}-${{env.NOW}}-production.zip
+          asset_path: ${{env.TAG}}-${{matrix.INDEX}}-production.zip
+          asset_name: ${{env.TAG}}-${{matrix.INDEX}}-production.zip
           asset_content_type: application/zip
         continue-on-error: false
       
