@@ -6,8 +6,8 @@ on: # push operation is operate
   push:
     # here since my repository branch is named `main` , you should follow your own repository like `master`
     branches: [main]
-  schedule:
-    - cron: "0 0/6 * * *"
+  # schedule:
+  #   - cron: "0 0/6 * * *"
 # CI enviroment settings
 env:
   TAG: "movielens-1m"

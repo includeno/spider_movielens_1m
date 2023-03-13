@@ -7,10 +7,10 @@ from selenium.webdriver.support import expected_conditions as EC
 import datetime
 
 def get_keywords(count):
-    if(count==None):
-        count=10
     movies=pd.read_csv('data/input.csv',encoding='utf-8')
-    return movies.Title.values
+    if(count==None):
+        count=500
+    return movies.Title.values[:count]
 
 def get_driver_options():
     import platform
@@ -76,13 +76,13 @@ def search(driver,keyword):
             print("movie Title:",keyword, movie_url)
             return {"Title":keyword,"url":movie_url,'time':datetime.datetime.now()}
 
-def main():
+def main(count=None):
     driver = get_driver()
     # 打开IMDB网站
     driver.get("https://www.imdb.com/")
     csv_file='data/output.csv'
     datas=[]
-    for keyword in get_keywords(10):
+    for keyword in get_keywords(count):
         try:
             result=search(driver=driver,keyword=keyword)
             if(result is not None):
