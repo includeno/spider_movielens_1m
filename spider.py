@@ -54,7 +54,7 @@ def get_driver():
     return driver
 
 def search(driver,keyword):
-    print("search:",keyword)
+    print("search:",keyword,flush=True)
     # 在搜索框中输入关键词并提交搜索
     search_box = driver.find_element(By.CLASS_NAME,"imdb-header-search__input")
     search_box.send_keys(keyword)
@@ -73,7 +73,7 @@ def search(driver,keyword):
         if(len(links)>0):
             link=links[0]
             movie_url = link.get_attribute("href")
-            print("movie Title:",keyword, movie_url)
+            print("movie Title:",keyword, movie_url,flush=True)
             return {"Title":keyword,"url":movie_url,'time':datetime.datetime.now()}
 
 def main(count=None):
@@ -83,6 +83,8 @@ def main(count=None):
     csv_file='data/output.csv'
     datas=[]
     for keyword in get_keywords(count):
+        print("==="*20,flush=True)
+        print("keyword:",keyword,flush=True)
         try:
             result=search(driver=driver,keyword=keyword)
             if(result is not None):
@@ -103,4 +105,5 @@ def main(count=None):
             driver = get_driver()
             # 打开IMDB网站
             driver.get("https://www.imdb.com/")
+            print("error:",e,flush=True)
     return csv_file
