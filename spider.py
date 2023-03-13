@@ -7,9 +7,11 @@ from selenium.webdriver.support import expected_conditions as EC
 import datetime
 from tqdm import tqdm
 
-def get_keywords(index):
+def get_keywords(index,limit=None):
     movies=pd.read_csv(f'data/input_{index}.csv',encoding='utf-8')
-    return movies.Title.values
+    if(limit==None):
+        return movies.Title.values
+    return movies.Title.values[:limit]
 
 def get_driver_by_system():
     import platform
@@ -82,7 +84,7 @@ def search(driver,keyword):
             return {"Title":keyword,"url":movie_url,'time':datetime.datetime.now()}
     return {"Title":keyword,"url":"",'time':datetime.datetime.now()}
 
-def main(index=None):
+def main(index=None,limit=None):
     if(index==None):
         index=1
     driver = get_driver()
@@ -91,7 +93,7 @@ def main(index=None):
     csv_file=f'data/output_{index}.csv'
 
     datas=[]
-    keywords=get_keywords(index)
+    keywords=get_keywords(index,limit)
     count=len(keywords)
     with tqdm(total=count) as pbar:
         for keyword in keywords:
@@ -111,7 +113,7 @@ def main(index=None):
                     print("csv 合并中2...",flush=True)
                     new_df.drop_duplicates(subset=['url'],keep='last',inplace=True)
                     print("csv 合并中3...",flush=True)
-                    new_df.to_csv(csv_file)
+                    new_df.to_csv(csv_file,index=False)
                     print("csv 合并成功",flush=True)
                 except Exception as e:
                     print("csv error:",e,flush=True)
