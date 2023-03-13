@@ -9,7 +9,7 @@ import datetime
 def get_keywords(count):
     if(count==None):
         count=10
-    movies=pd.read_csv('input.csv',encoding='utf-8')
+    movies=pd.read_csv('data/input.csv',encoding='utf-8')
     return movies.Title.values
 
 def get_driver_options():
