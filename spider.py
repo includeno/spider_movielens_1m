@@ -71,7 +71,7 @@ def search(driver,keyword):
     search_box = driver.find_element(By.CLASS_NAME,"imdb-header-search__input")
     search_box.send_keys(keyword)
     search_box.send_keys(Keys.RETURN)
-    time.sleep(1)
+    time.sleep(2)
 
     # 等待搜索结果页面加载完成
     wait = WebDriverWait(driver, 10)
