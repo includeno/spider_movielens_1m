@@ -51,7 +51,7 @@ jobs:
       - name: Run Spider
         run: |
           docker build -t test_image  .
-          docker run --name test_container -e SENDER=${{secrets.SENDER}} -e PASSWORD=${{secrets.PASSWORD}} -e RECIPIENT=${{secrets.RECIPIENT}} -e SMTP_SERVER=${{secrets.SMTP_SERVER}} -e PORT=${{secrets.PORT}} -e INDEX==${{matrix.INDEX}} test_image
+          docker run --name test_container -e SENDER=${{secrets.SENDER}} -e PASSWORD=${{secrets.PASSWORD}} -e RECIPIENT=${{secrets.RECIPIENT}} -e SMTP_SERVER=${{secrets.SMTP_SERVER}} -e PORT=${{secrets.PORT}} -e INDEX=${{matrix.INDEX}} test_image
           docker cp test_container:/app .
       - name: ZIP project # This would actually build your project, using zip for an example artifact
         run: |
