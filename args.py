@@ -30,4 +30,4 @@ with open('DATE', 'w') as f:
 
 file_path=main(args.index)
 
-send_email(args.sender,args.ps,args.recipient,args.smtp_server,args.port,subject='Movielens-1m',attachment_path=file_path)
+#send_email(args.sender,args.ps,args.recipient,args.smtp_server,args.port,subject='Movielens-1m',attachment_path=file_path)

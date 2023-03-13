@@ -105,9 +105,14 @@ def main(index=None,limit=None):
             print("==="*20,flush=True)
             print("keyword:",keyword,flush=True)
             try:
-                result=search(driver=driver,keyword=keyword)
+                try:
+                    result=search(driver=driver,keyword=keyword)
+                except Exception as e:
+                    print("search error:",e,keyword,flush=True)
+                    result=None
                 if(result is not None):
                     datas.append(result)
+                print(len(datas),"有效长度",flush=True)
                 df = pd.DataFrame(datas, columns=['Title','url','time'])
                 try:
                     print("csv 合并中...",flush=True)
