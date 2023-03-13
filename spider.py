@@ -73,6 +73,7 @@ def search(driver,keyword):
             movie_url = link.get_attribute("href")
             print("movie Title:",keyword, movie_url,flush=True)
             return {"Title":keyword,"url":movie_url,'time':datetime.datetime.now()}
+    return {"Title":keyword,"url":"",'time':datetime.datetime.now()}
 
 def main(count=None):
     if(count==None):
