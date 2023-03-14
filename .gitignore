@@ -1,3 +1,4 @@
 *.pyc
 download/*
 AUTH_TOKEN
+out
