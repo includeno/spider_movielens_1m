@@ -94,7 +94,11 @@ def get_movie_info(movie_url):
     soup = BeautifulSoup(html, 'html.parser')
 
     # 获取电影标题
-    title = soup.find('h1').text.strip()
+    title=""
+    try:
+        title = soup.find('h1').text.strip()
+    except:
+        print("没有简介")
 
     # 获取电影时长
     time = None
@@ -112,7 +116,11 @@ def get_movie_info(movie_url):
         break
 
     # 获取电影简介
-    intro = soup.select_one('span[data-testid="plot-xl"]').text.strip()
+    intro=""
+    try:
+        intro = soup.select_one('div[data-testid="storyline-plot-summary"]').text.strip()
+    except:
+        print("没有简介")
 
     # 获取电影类型
     genres = []
